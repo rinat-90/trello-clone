@@ -103,11 +103,12 @@ import {models} from "feathers-vuex";
 export default {
   name: "BoardsList",
   components: { BoardsCard, PopOverMenu, List },
+  inject: ['dialog'],
   data(){
     return {
       btnText: 'Private',
       colors: ['blue', 'orange', 'brown', 'grey', 'teal', 'navy', 'indigo', 'purple'],
-      dialog: false,
+      // dialog: false,
       boardType: 'Private',
       board: {
         name: '',

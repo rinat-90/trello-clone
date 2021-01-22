@@ -11,7 +11,10 @@
 import Navigation from "@/components/Navigation";
 export default {
   name: 'App',
-  components:{ Navigation }
+  components:{ Navigation },
+  provide: {
+    dialog: false
+  }
 };
 </script>
 

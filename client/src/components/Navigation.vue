@@ -41,19 +41,37 @@
       </v-btn>
     </v-toolbar-items>
     <div v-else class="d-flex align-center">
-      <v-btn color="rgba(255,255,255, .24)" class="mr-1">
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-      <v-btn color="rgba(255,255,255, .24)" class="mr-1 hidden-xs-only">
-        <v-icon>mdi-information-outline</v-icon>
-      </v-btn>
-      <v-btn color="rgba(255,255,255, .24)" class="mr-1">
-        <v-icon>mdi-bell-outline</v-icon>
-      </v-btn>
+      <MenuPopOver icon="mdi-plus" title="Create">
+        <v-list dense three-line>
+          <v-list-item link @click="dialog = true">
+            <v-list-item-content>
+              <v-list-item-title>
+                <v-icon left small>mdi-trello</v-icon>
+                Create board
+              </v-list-item-title>
+              <div class="grey--text darken-4">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci consequatur dolor eum ex fugiat ipsam laborum quisquam ratione reprehenderit ullam?
+              </div>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </MenuPopOver>
+      <MenuPopOver icon="mdi-information-outline" title="Information">
+        <v-card-text>
+          <v-card flat elevation="0">
+            <v-img height="150px" src="../assets/info-image.png"></v-img>
+            <div class="headline text-center font-weight-bold">Get Inspired by Dozens Of Different Trello Workflows </div>
+          </v-card>
+        </v-card-text>
+      </MenuPopOver>
+      <MenuPopOver icon="mdi-bell-outline" title="Notifications">
+        card
+      </MenuPopOver>
       <!--        <div class="font-weight-bold mr-2">{{ user.displayName }}</div>-->
       <v-avatar size="36" color="grey">
         <img :src="user.imageUrl" alt="">
       </v-avatar>
+
 
       <!--        <v-btn text @click="signOutHandler">-->
       <!--          Sign out-->
@@ -63,13 +81,18 @@
 </template>
 
 <script>
+import MenuPopOver from "@/components/MenuPopOver";
 import LogoSVG from "@/components/LogoSVG";
 import {mapActions, mapState} from "vuex";
 export default {
   name: "Navigation",
-  components: { LogoSVG },
+  components: { LogoSVG, MenuPopOver },
   computed: {
     ...mapState('auth', { user: 'user'})
+  },
+  inject: ['dialog'],
+  mounted() {
+    console.log(this.dialog)
   },
   methods: {
     ...mapActions('auth', ['logout']),
