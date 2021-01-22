@@ -5,12 +5,11 @@
         <v-icon left>mdi-plus</v-icon>
         <span>Add another card</span>
       </v-btn>
-      <v-form v-model="valid" ref="form" v-if="isCreating" @submit.prevent="createCardHandler">
+      <v-form v-model="valid" ref="form" v-if="isCreating">
         <v-text-field
             v-model="card.title"
             ref="titleInput"
-            @keydown.enter.prevent="createCardHandler"
-            @focusout="focusOut"
+            @keydown.enter.prevent="onCreateCard"
             :rules="notEmptyRules"
             placeholder="Enter a title for this card"
             autofocus
@@ -22,10 +21,10 @@
     </v-card-text>
     <v-card-actions v-if="isCreating">
       <v-btn
+        @click.prevent="onCreateCard"
           color="success"
-          type="button"
-          :loading="isCreatePending"
-          :disabled="!valid || isCreatePending"
+          :loading="loading"
+          :disabled="!valid || loading"
           small>
         Add card
       </v-btn>
@@ -37,21 +36,17 @@
 </template>
 
 <script>
-import {models} from "feathers-vuex";
-import { mapState } from 'vuex'
-
 export default {
   name: "CreateCard",
   props: {
-    listId: String,
+    createCardHandler: Function,
+    loading: Boolean,
     boardId: String,
-    user: Object,
-    createActivity: Function
+    listId: String
   },
   data(){
     return {
       isCreating: false,
-      isCreatePending: false,
       valid: true,
       card: {
         title: '',
@@ -63,21 +58,15 @@ export default {
     }
   },
   methods: {
-    async createCardHandler(){
+    async onCreateCard(){
       if(this.$refs.form.validate()){
         this.card.boardId = this.boardId
         this.card.listId = this.listId
-        const card = new models.api.Card(this.card)
-        this.isCreatePending = true
-        await card.save()
-        this.isCreatePending = false
-        this.$refs.form.reset()
-        this.createActivity(`**${this.user.displayName}** added card **${card.title}**`)
+
+        await this.createCardHandler(this.card)
+        await this.$refs.form.reset()
       }
-      this.$refs.titleInput.$el.focus()
     },
-    focusOut(e) {
-    }
   },
 }
 </script>

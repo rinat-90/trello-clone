@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import FeathersVuex from '../feathers-client'
 import auth from './store.auth'
+import authUser from "@/store/modules/authUser";
 
 
 Vue.use(Vuex)
@@ -23,5 +24,8 @@ export default new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
+  modules: {
+    authUser
+  },
   plugins: [...servicePlugins, auth]
 })

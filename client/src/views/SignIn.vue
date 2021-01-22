@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { models } from 'feathers-vuex'
 import { mapState, mapActions } from "vuex";
 
 export default {
@@ -54,18 +53,10 @@ export default {
   },
 
   methods: {
-    ...mapActions('auth',['authenticate']),
+    ...mapActions('authUser',['signIn']),
     signInHandler(){
       if (this.$refs.form.validate()){
-        console.log(this.user)
-        this.authenticate({
-          strategy: 'local',
-          ...this.user
-        }).then(() => {
-          this.$router.push('/boards')
-        }).catch(e => {
-          console.log(e)
-        })
+        this.signIn(this.user)
       }
     }
   },

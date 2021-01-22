@@ -49,7 +49,7 @@
 
 <script>
 import { models } from 'feathers-vuex'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: "SignUp",
   data: (vm) => ({
@@ -86,14 +86,10 @@ export default {
   },
 
   methods: {
+    ...mapActions('authUser', ['signUp']),
     signUpHandler(){
       if (this.$refs.form.validate()){
-        const user = new models.api.User(this.user)
-        user.save()
-        .then(user => {
-          console.log(user)
-          this.$router.push('/signin')
-        })
+        this.signUp(this.user)
       }
     }
   },

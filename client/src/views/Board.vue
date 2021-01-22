@@ -21,21 +21,28 @@
       </v-flex>
       <v-flex xs12>
         <v-layout wrap>
-          <v-flex v-if="!isGetPending" v-for="list in lists" :key="list._id" xs6 sm4 md2 pa-2>
-            <v-card elevation="0" :color="droppingList === list ? 'green lighten-4': '#ebebef'" @dragover="setDroppingList(list)">
+          <v-flex v-if="!isGetPending" v-for="list in lists" :key="list._id" xs6 sm4 md3 lg2 pa-2>
+            <v-card
+              @dragover="setDroppingList(list)"
+              elevation="0"
+              :color="droppingList === list ? 'green lighten-4': '#ebebef'">
               <v-subheader class="font-weight-bold">{{ list.name }}</v-subheader>
               <v-card
-                  draggable="true"
-                  @dragstart="startDraggingCard(card)"
-                  @dragend="dropCard"
-                  v-if="cardsByListId[list._id]"
-                  v-for="card in cardsByListId[list._id]"
-                  :key="card._id"
-                  color="pa-2 ma-2"
-                  elevation="1">
+                v-if="cardsByListId[list._id]"
+                v-for="card in cardsByListId[list._id]"
+                :key="card._id"
+                draggable="true"
+                @dragstart="startDraggingCard(card)"
+                @dragend="dropCard"
+                color="pa-2 ma-2"
+                elevation="1">
                 <div style="font-size: 14px">{{ card.title }}</div>
               </v-card>
-              <create-card :board-id="id" :list-id="list._id" :create-activity="createActivity" :user="user" />
+              <create-card
+                :list-id="list._id"
+                :board-id="id"
+                :loading="isCreatePending"
+                :create-card-handler="createCardHandler"  />
             </v-card>
           </v-flex>
           <v-flex xs6 sm4 md2 pa-2>
@@ -43,104 +50,43 @@
               <v-icon left>mdi-plus</v-icon>
               Add another list
             </v-btn>
-            <v-card v-else>
-              <v-form ref="form" v-model="valid">
-                <v-card-text class="pa-2">
-                  <v-text-field
-                      @keydown.enter.prevent="createListHandler"
-                      v-model="list.name"
-                      :rules="notEmptyRules"
-                      placeholder="Enter list title..."
-                      autofocus
-                      flat
-                      dense
-                      solo
-                      required
-                  />
-                  <v-btn
-                      color="success"
-                      @click.prevent="createListHandler"
-                      :loading="isCreatePending"
-                      :disabled="!valid || isCreatePending"
-                      small>
-                    Add
-                  </v-btn>
-                  <v-btn class="ml-2" icon text @click="isCreating = false">
-                    <v-icon>mdi-close</v-icon>
-                  </v-btn>
-                </v-card-text>
-              </v-form>
-            </v-card>
+            <CreateListCard
+              v-else
+              :loading="isCreatePending"
+              :create-list-handler="createListHandler" />
           </v-flex>
         </v-layout>
       </v-flex>
     </v-layout>
-    <v-navigation-drawer
-        v-model="drawer"
-        right
-        absolute
-        temporary
-    >
-      <v-toolbar elevation="1">
-        <v-flex class="text-center heading"><strong>Menu</strong></v-flex>
-        <v-btn icon absolute right @click="drawer = !drawer">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-toolbar>
-      <v-list
-          three-line
-          dense
-          nav
-          class="py-0"
-      >
-        <v-subheader>Activities</v-subheader>
-        <v-list-item two-line v-for="activity in activities" :key="activity._id">
-          <v-list-item-avatar>
-            <v-icon color="green">mdi-plus</v-icon>
-          </v-list-item-avatar>
-
-          <v-list-item-content>
-            <v-list-item-subtitle v-html="markdownify(activity.text)"></v-list-item-subtitle>
-            <v-list-item-subtitle>
-              <timeago :datetime="activity.createdAt" :auto-update="60"></timeago>
-              </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+    <ActivityList
+      :value="drawer"
+      :activities="activities"
+      @onClose="drawer = false" />
   </v-container>
 </template>
 
 <script>
-import marked from 'marked'
-import {mapActions, mapGetters, mapState} from "vuex";
-import {models} from "feathers-vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
+import  {models } from "feathers-vuex";
+import ActivityList from "@/components/ActivityList";
 import CreateCard from "@/components/CreateCard";
 import BoardToolbar from "@/components/BoardToolbar";
+import CreateListCard from "@/components/CreateListCard";
 
 export default {
   name: "Board",
   props: {
     id: String
   },
-  components: { CreateCard, BoardToolbar },
+  components: { CreateCard, BoardToolbar, ActivityList, CreateListCard },
   data(){
     return {
+      isCreating: false,
       drawer: false,
       draggingCard: null,
       droppingList: null,
-      isCreating: false,
-      cardValid: false,
       valid: false,
       board: {},
-      list: {
-        name: '',
-        order: 0,
-        archived: false
-      },
-      notEmptyRules: [
-        v => !!v || 'Password is required',
-      ],
     }
   },
   computed: {
@@ -182,21 +128,17 @@ export default {
     ...mapActions('lists', { getLists: 'find' }),
     ...mapActions('cards', { getCards: 'find' }),
     ...mapActions('activities', { getActivities: 'find' }),
-    async createListHandler(){
-      if(this.$refs.form.validate()){
-        this.list.boardId = this.id
-        const list = new models.api.List(this.list)
-        await list.save()
-        this.$refs.form.reset()
-        this.list = {
-          name: '',
-          order: this.list.order+ 1,
-          archived: false
-        }
-        this.createActivity(`**${this.user.displayName}** added **${list.name}**`)
-
-      }
+    async createListHandler(list){
+      list.boardId = this.id
+      const newList = new models.api.List(list)
+      await newList.save()
+      this.createActivity(`**${this.user.displayName}** added **${newList.name}**`)
       this.isCreating = false
+    },
+    async createCardHandler(card){
+      const newCard = new models.api.Card(card)
+      await newCard.save()
+      this.createActivity(`**${this.user.displayName}** added card **${card.title}**`)
     },
     createActivity(text) {
       const activity= new models.api.Activity()
@@ -215,8 +157,6 @@ export default {
         if (this.draggingCard.listId !== this.droppingList._id){
           const fromList = this.lists.find(list => list._id === this.draggingCard.listId)
           const toList = this.lists.find(list => list._id === this.droppingList._id)
-          console.log(fromList)
-          console.log(toList)
           this.draggingCard.listId = this.droppingList._id;
           await this.draggingCard.save()
           this.createActivity(`**${this.user.displayName}** moved card **${this.draggingCard.title}** from **${fromList.name}** to **${toList.name}**`)
@@ -226,9 +166,6 @@ export default {
       this.droppingList = null
       this.draggingCard = null
     },
-    markdownify(text) {
-      return marked(text)
-    }
   },
   async mounted() {
     this.getBoard(this.id)

@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: "BoardsCard",
+  name: "SingleBoard",
   props: {
     board: Object
   }

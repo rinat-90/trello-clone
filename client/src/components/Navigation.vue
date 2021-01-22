@@ -43,7 +43,7 @@
     <div v-else class="d-flex align-center">
       <MenuPopOver icon="mdi-plus" title="Create">
         <v-list dense three-line>
-          <v-list-item link @click="dialog = true">
+          <v-list-item link>
             <v-list-item-content>
               <v-list-item-title>
                 <v-icon left small>mdi-trello</v-icon>
@@ -73,9 +73,9 @@
       </v-avatar>
 
 
-      <!--        <v-btn text @click="signOutHandler">-->
-      <!--          Sign out-->
-      <!--        </v-btn>-->
+              <v-btn text @click="signOutHandler">
+                Sign out
+              </v-btn>
     </div>
   </v-app-bar>
 </template>
@@ -90,19 +90,8 @@ export default {
   computed: {
     ...mapState('auth', { user: 'user'})
   },
-  inject: ['dialog'],
-  mounted() {
-    console.log(this.dialog)
-  },
   methods: {
-    ...mapActions('auth', ['logout']),
-    signOutHandler() {
-      this.logout().then(() => {
-        this.$router.push('/signin')
-      }).catch((e) => {
-        console.log(e)
-      })
-    }
+    ...mapActions('authUser', { signOutHandler: 'signOut'}),
   }
 }
 </script>
