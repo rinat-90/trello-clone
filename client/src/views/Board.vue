@@ -17,8 +17,7 @@
     </v-layout>
     <v-layout row wrap v-else>
       <v-flex xs12>
-        <BoardToolbar @onMenuClick="drawer = true" :board-title="board.name" />
-<!--        <div style="position: relative" class="display-1 text-center text&#45;&#45;white mb-3" v-if="board">{{ board.name }}</div>-->
+        <BoardToolbar @onMenuClick="drawer = true" :board-name="board.name" />
       </v-flex>
       <v-flex xs12>
         <v-layout wrap>

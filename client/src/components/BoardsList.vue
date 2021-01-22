@@ -55,51 +55,10 @@
                         class="create-board-input"
                         placeholder="Add board title"
                     />
+                    <PopOverMenu :btn-text="btnText">
+                      <List @onItemClicked="item => this.btnText = item.type" />
+                    </PopOverMenu>
 
-                    <div>
-                      <v-menu
-                          v-model="menu"
-                          :close-on-content-click="false"
-                          :nudge-width="200"
-                          offset-y
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                              small
-                              dark
-                              text
-                              v-bind="attrs"
-                              v-on="on"
-                          >
-                            <v-icon small left>mdi-lock-outline</v-icon>
-                            <span>Privat</span>
-                            <v-icon small right>mdi-chevron-down</v-icon>
-                          </v-btn>
-                        </template>
-                        <v-card width="370px">
-                          <v-list three-line dense>
-                            <v-list-item>
-                              <v-list-item-avatar>
-                                <v-icon>mdi-account</v-icon>
-                              </v-list-item-avatar>
-                              <v-list-item-content>
-                                <v-list-item-title >Private</v-list-item-title>
-                                <v-list-item-subtitle>Only members can see and edit this board.</v-list-item-subtitle>
-                              </v-list-item-content>
-                            </v-list-item>
-                            <v-list-item>
-                              <v-list-item-avatar>
-                                <v-icon>mdi-account</v-icon>
-                              </v-list-item-avatar>
-                              <v-list-item-content>
-                                <v-list-item-title >Private</v-list-item-title>
-                                <v-list-item-subtitle>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci culpa cumque ipsa nemo similique temporibus?</v-list-item-subtitle>
-                              </v-list-item-content>
-                            </v-list-item>
-                          </v-list>
-                        </v-card>
-                      </v-menu>
-                    </div>
                   </div>
                 </v-sheet>
               </v-flex>
@@ -107,12 +66,18 @@
                 <v-container>
                   <v-layout row justify-space-between>
                     <v-flex xs4 v-for="(color, i) in colors" :key="i" mb-2>
-                      <v-sheet width="28px" height="28px" :color="color" class="rounded" @click="board.background = colors[i]">
+                      <v-sheet
+                        @click="board.background = colors[i]"
+                        :color="color"
+                        width="28px"
+                        height="28px"
+                        class="rounded d-flex align-center justify-center">
+                        <v-icon small v-if="board.background === color">mdi-check</v-icon>
                       </v-sheet>
                     </v-flex>
                     <v-flex xs4 mb-2>
-                      <v-sheet width="28px" height="28px" color="white" class="rounded text-center">
-                        <v-icon class="ma-auto" dark color="blue">mdi-dots-horizontal</v-icon>
+                      <v-sheet width="28px" height="28px" color="white" class="rounded d-flex align-center justify-center">
+                        <v-icon small class="ma-auto" dark color="blue">mdi-dots-horizontal</v-icon>
                       </v-sheet>
                     </v-flex>
                   </v-layout>
@@ -130,20 +95,23 @@
 
 <script>
 import BoardsCard from "@/components/BoardsCard";
+import PopOverMenu from "@/components/PopOverMenu";
+import List from "@/components/List";
 import {mapActions, mapGetters, mapState} from "vuex";
 import {models} from "feathers-vuex";
 
 export default {
   name: "BoardsList",
-  components: { BoardsCard },
+  components: { BoardsCard, PopOverMenu, List },
   data(){
     return {
+      btnText: 'Private',
       colors: ['blue', 'orange', 'brown', 'grey', 'teal', 'navy', 'indigo', 'purple'],
-      menu: false,
       dialog: false,
+      boardType: 'Private',
       board: {
         name: '',
-        background: 'light-blue',
+        background: 'blue',
       },
       notEmptyRules: [
         v => !!v || 'Password is required',
@@ -165,10 +133,11 @@ export default {
     },
     clickOutsideHandler(e) {
       if(e.target.classList.contains('v-overlay__scrim')){
+        this.board.name = ''
         this.dialog = false
         this.menu = false
       }
-    }
+    },
   },
   computed: {
     ...mapState('auth', { user: 'user'}),
@@ -186,7 +155,8 @@ export default {
     },
     valid(){
       return this.board.name === ''
-    }
+    },
+
   },
 }
 </script>
@@ -231,4 +201,5 @@ export default {
   font-weight: bolder;
   color: rgba(255,255, 255, .7);
 }
+
 </style>
