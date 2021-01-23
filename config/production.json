@@ -1,5 +1,4 @@
 {
   "host": "https://ri-trello-clone.vercel.app",
-  "port": "PORT",
-  "mongodb": "MONGO_DB_URI"
+  "port": "PORT"
 }
