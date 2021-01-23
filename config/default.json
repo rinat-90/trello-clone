@@ -18,7 +18,7 @@
       "header": {
         "typ": "access"
       },
-      "audience": "https://ri-trello-clone.vercel.app",
+      "audience": "https://trello.ribroff.vercel.app/",
       "issuer": "feathers",
       "algorithm": "HS256",
       "expiresIn": "1d"

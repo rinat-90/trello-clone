@@ -5,7 +5,7 @@ import io from 'socket.io-client'
 import { iff, discard } from 'feathers-hooks-common'
 import feathersVuex from 'feathers-vuex'
 
-let API_URL = 'https://ri-trello-clone.vercel.app'
+let API_URL = 'https://trello.ribroff.vercel.app/'
 
 if (window.location.hostname === 'localhost'){
   API_URL = 'http://localhost:3030'
